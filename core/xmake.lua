@@ -27,7 +27,6 @@ set_strip("all")
 
 -- fomit the frame pointer
 add_cxflags("-fomit-frame-pointer")
-add_mxflags("-fomit-frame-pointer")
 
 -- for the windows platform (msvc)
 if is_plat("windows") then 
