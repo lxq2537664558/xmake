@@ -146,7 +146,7 @@ function main(package)
                 end
 
                 -- download package 
-                if git.checkurl(url) then
+                if package:version_from("tags", "branches") and git.checkurl(url) then
                     _checkout(package, url, sourcedir_tmp)
                 else
                     _download(package, url, sourcedir_tmp)

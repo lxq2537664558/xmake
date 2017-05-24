@@ -149,10 +149,12 @@ function _instance:version_str()
 end
 
 -- the verson from tags, branches or versions?
-function _instance:version_from(source)
+function _instance:version_from(...)
 
     -- from source?
-    return self:version().source == source
+    for _, source in ipairs({...}) do
+        return self:version().source == source
+    end
 end
 
 -- set the version
