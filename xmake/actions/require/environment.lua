@@ -52,8 +52,8 @@ function _enter_windows()
     -- init winenv directory
     local winenv_dir = path.translate("~/.xmake/winenv")
 
-    -- add $programdir, $programdir/winenv/cmd to $path
-    os.addenv("PATH", os.programdir(), path.join(os.programdir(), "winenv", "bin"))
+    -- add $programdir/winenv/cmd to $path
+    os.addenv("PATH", path.join(os.programdir(), "winenv", "bin"))
 
     -- load winenv 
     for _, script_dir in ipairs(os.files(path.join(winenv_dir, "**", "winenv.lua")), path.directory) do

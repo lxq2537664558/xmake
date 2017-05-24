@@ -14,8 +14,7 @@ set_warnings("all", "error")
 set_languages("c99", "cxx11")
 
 -- disable some compiler errors
-add_cxflags("-Wno-error=deprecated-declarations", "-fno-strict-aliasing")
-add_mxflags("-Wno-error=deprecated-declarations", "-fno-strict-aliasing")
+add_cxflags("-Wno-error=deprecated-declarations", "-fno-strict-aliasing", "-Wno-error=nullability-completeness")
 
 -- add defines
 add_defines("_GNU_SOURCE=1", "_FILE_OFFSET_BITS=64", "_LARGEFILE_SOURCE")
