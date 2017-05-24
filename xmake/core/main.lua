@@ -150,6 +150,14 @@ function main._init()
         end
     end
 
+    -- add the directory of the program file (xmake) to $PATH environment
+    local programfile = os.programfile()
+    if programfile and os.isfile(programfile) then
+        os.addenv("PATH", path.directory(programfile))
+    else
+        os.addenv("PATH", os.programdir())
+    end
+
     -- define task and package apis first before loading project's xmake.lua - calling option.init()
     project.define_apis(task.apis())
     project.define_apis(package.apis())

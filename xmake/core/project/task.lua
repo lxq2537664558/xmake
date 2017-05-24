@@ -188,8 +188,7 @@ function task._interpreter()
             ,   globaldir   = global.directory()
             ,   configdir   = config.directory()
             ,   projectdir  = xmake._PROJECT_DIR
-            ,   programdir  = xmake._PROGRAM_DIR
-            ,   xmake       = path.join(xmake._PROGRAM_DIR, "xmake")
+            ,   programdir  = os.programdir()
             }
 
             -- map it
