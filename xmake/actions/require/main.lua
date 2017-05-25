@@ -28,8 +28,11 @@ import("core.project.task")
 import("core.project.config")
 import("core.project.project")
 import("core.platform.platform")
-import("package")
-import("repository")
+import("list")
+import("info")
+import("clear")
+import("search")
+import("install")
 
 --
 -- the default repositories:
@@ -63,40 +66,6 @@ function _load_project()
     os.cd(project.directory())
 end
 
--- install and update all outdated package dependencies
-function _install(requires)
-
-    -- install packages
-    package.install_packages(requires)
-end
-
--- clear all installed package caches
-function _clear()
-
-    -- clear all caches
-    package.clear_caches()
-end
-
--- search for the given packages from repositories
-function _search(packages)
-    -- TODO
-end
-
--- show the given package info
-function _info(packages)
-    -- TODO
-end
-
--- list all package dependencies
-function _list()
-
-    -- list all requires
-    print("Tha package dependencies:")
-    for packagename, requireinfo in pairs(package.load_requires(project.requires())) do
-        print("    %s %s", packagename, requireinfo.version)
-    end
-end
-
 -- main
 function main()
 
@@ -106,26 +75,26 @@ function main()
     -- clear all installed packages cache
     if option.get("clear") then
 
-        _clear(option.get("global"))
+        clear(option.get("global"))
 
     -- search for the given packages from repositories
     elseif option.get("search") then
 
-        _search(option.get("packages"))
+        search(option.get("packages"))
 
     -- show the given package info
     elseif option.get("info") then
 
-        _info(option.get("packages"))
+        info(option.get("packages"))
 
     -- list all package dependencies
     elseif option.get("list") then
 
-        _list()
+        list()
 
     -- install and update all outdated package dependencies by default if no arguments
     else
-        _install(option.get("requires"))
+        install(option.get("requires"))
     end
 end
 

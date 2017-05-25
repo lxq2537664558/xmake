@@ -31,9 +31,7 @@ import("core.project.project")
 import("core.package.package", {alias = "core_package"})
 import("devel.git")
 import("net.fasturl")
-import("action")
 import("repository")
-import("environment")
 
 --
 -- parse require string
@@ -235,6 +233,9 @@ end
 -- load all git refs from packages
 function _load_packages_gitrefs(packages)
 
+    -- enter cache scope
+    cache.enter("local.require")
+
     -- load cache
     local gitrefs = nil
     if option.get("force") then
@@ -277,6 +278,7 @@ function _load_packages_gitrefs(packages)
 
     -- save cache
     cache.set("gitrefs", gitrefs)
+    cache.flush()
 
     -- ok?
     return results
@@ -299,13 +301,8 @@ function _select_package_version(package, required_ver, gitrefs)
 end
 
 -- the cache directory
-function cache_directory()
+function cachedir()
     return path.join(global.directory(), "cache", "packages")
-end
-
--- clear caches
-function clear_caches()
-    os.rm(cache_directory())
 end
 
 -- load requires
@@ -359,32 +356,5 @@ function load_packages(requires)
 
     -- ok
     return packages
-end
-
--- install packages
-function install_packages(requires)
-
-    -- enter cache scope
-    cache.enter("local.require")
-
-    -- enter environment 
-    environment.enter()
-
-    -- TODO need optimization
-    -- pull all repositories first
-    repository.pull()
-
-    -- install all required packages from repositories
-    for _, package in ipairs(load_packages(requires or project.requires())) do
-
-        -- install package
-        action.install.main(package, cache_directory())
-    end
-
-    -- leave environment
-    environment.leave()
-
-    -- save cache
-    cache.flush()
 end
 

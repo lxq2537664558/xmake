@@ -43,10 +43,10 @@ function main(package, cachedir)
     local oldir = os.cd(workdir)
 
     -- download package first
-    download.main(package)
+    download(package)
 
     -- build package 
-    build.main(package)
+    build(package)
 
     -- the package scripts
     local scripts =
