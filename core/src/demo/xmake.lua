@@ -33,4 +33,9 @@ target("demo")
 
     -- add the common source files
     add_files("**.c") 
-       
+           
+    -- for macosx
+    if is_plat("macosx") then
+        add_ldflags("-all_load", "-pagezero_size 10000", "-image_base 100000000")
+    end
+
