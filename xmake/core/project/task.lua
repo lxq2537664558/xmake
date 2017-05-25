@@ -29,7 +29,6 @@ local task = task or {}
 local os            = require("base/os")
 local table         = require("base/table")
 local utils         = require("base/utils")
-local filter        = require("base/filter")
 local string        = require("base/string")
 local interpreter   = require("base/interpreter")
 local sandbox       = require("sandbox/sandbox")
