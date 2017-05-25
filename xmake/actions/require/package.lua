@@ -24,6 +24,8 @@
 
 -- imports
 import("core.base.semver")
+import("core.base.option")
+import("core.project.cache")
 import("core.project.global")
 import("core.project.project")
 import("core.package.package", {alias = "core_package"})
@@ -230,24 +232,70 @@ function _load_packages(requires)
     return packages
 end
 
+-- load all git refs from packages
+function _load_packages_gitrefs(packages)
+
+    -- load cache
+    local gitrefs = nil
+    if option.get("force") then
+        gitrefs = {}
+    else
+        gitrefs = cache.get("gitrefs") or {}
+    end
+
+    -- run tasks
+    local results = {}
+    process.runjobs(function (index)
+        local package = packages[index]
+        if package then
+
+            -- attempt to get refs from cache first
+            local refs = gitrefs[package:name()]
+            if refs then
+                results[package:name()] = {tags = refs.tags, branches = refs.branches}
+            else
+                -- attempt to get refs from the git url
+                local tags = {}
+                local branches = {}
+                for _, url in ipairs(package:urls()) do
+                    if git.checkurl(url) then
+                        
+                        -- fetch refs
+                        tags, branches = git.refs(url) 
+
+                        -- save result
+                        results[package:name()] = {tags = tags, branches = branches}
+
+                        -- cache result
+                        gitrefs[package:name()] = {tags = tags, branches = branches}
+                        break
+                    end
+                end
+            end
+        end
+    end, #packages)
+
+    -- save cache
+    cache.set("gitrefs", gitrefs)
+
+    -- ok?
+    return results
+end
+
 -- select package version
-function _select_package_version(package, required_ver)
+function _select_package_version(package, required_ver, gitrefs)
 
     -- get versions
     local versions = package:get("versions") 
 
     -- attempt to get tags and branches from the git url
-    local tags = {}
-    local branches = {}
-    for _, url in ipairs(package:urls()) do
-        if git.checkurl(url) then
-            tags, branches = git.refs(url) 
-            break
-        end
+    local refs = {}
+    if gitrefs then
+        refs = gitrefs[package:name()] or {}
     end
 
     -- select required version
-    return semver.select(required_ver, versions, tags, branches)
+    return semver.select(required_ver, versions, refs.tags, refs.branches)
 end
 
 -- the cache directory
@@ -289,6 +337,9 @@ function load_packages(requires)
         fasturl.add(package:urls())
     end
 
+    -- load git refs from packages
+    local gitrefs = _load_packages_gitrefs(packages)
+
     -- sort and update urls
     for _, package in ipairs(packages) do
 
@@ -299,7 +350,7 @@ function load_packages(requires)
         if #package:urls() > 0 then
 
             -- select package version
-            local version, source = _select_package_version(package, package:requireinfo().version)
+            local version, source = _select_package_version(package, package:requireinfo().version, gitrefs)
 
             -- save version to package
             package:version_set(version, source)
@@ -312,6 +363,9 @@ end
 
 -- install packages
 function install_packages(requires)
+
+    -- enter cache scope
+    cache.enter("local.require")
 
     -- enter environment 
     environment.enter()
@@ -329,5 +383,8 @@ function install_packages(requires)
 
     -- leave environment
     environment.leave()
+
+    -- save cache
+    cache.flush()
 end
 
