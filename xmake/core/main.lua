@@ -45,7 +45,7 @@ local menu =
     title = "XMake v" .. xmake._VERSION .. ", The Make-like Build Utility based on Lua"
 
     -- copyright
-,   copyright = "Copyright (C) 2015-2016 Ruki Wang, ${underline}tboox.org${clear}, ${underline}xmake.io${clear}\nCopyright (C) 2005-2015 Mike Pall, ${underline}luajit.org${clear}"
+,   copyright = "Copyright (C) 2015-2017 Ruki Wang, ${underline}tboox.org${clear}, ${underline}xmake.io${clear}\nCopyright (C) 2005-2015 Mike Pall, ${underline}luajit.org${clear}"
 
     -- the tasks: xmake [task]
 ,   task.menu
