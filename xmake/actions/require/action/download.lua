@@ -121,12 +121,30 @@ function _download(package, url, sourcedir)
     cprint("${green}ok")
 end
 
+-- get sorted urls
+function _urls(package)
+
+    -- sort urls from the version source
+    local urls = {{}, {}}
+    for _, url in ipairs(package:urls()) do
+        if git.checkurl(url) then
+            table.insert(urls[1], url)
+        else
+            table.insert(urls[2], url)
+        end
+    end
+    if package:version_from("tags", "branches") then
+        return table.join(urls[1], urls[2]) 
+    else
+        return table.join(urls[2], urls[1])
+    end
+end
+
 -- download the given package
 function main(package)
 
-    -- download package from url or mirror
-    local urls = package:urls()
-    for idx, url in ipairs(urls) do
+    -- download package from urls
+    for idx, url in ipairs(_urls(package)) do
 
         -- filter url
         url = package:filter():handle(url)
@@ -146,7 +164,7 @@ function main(package)
                 end
 
                 -- download package 
-                if package:version_from("tags", "branches") and git.checkurl(url) then
+                if git.checkurl(url) then
                     _checkout(package, url, sourcedir_tmp)
                 else
                     _download(package, url, sourcedir_tmp)
