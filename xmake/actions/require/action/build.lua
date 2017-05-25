@@ -30,7 +30,7 @@ import("core.sandbox.sandbox")
 import(".environment")
 
 -- build for xmake file
-function _build_for_xmakefile(package)
+function _build_for_xmakefile(package, buildfile)
 
     -- configure it first
     if config.plat() and config.arch() then
@@ -41,33 +41,50 @@ function _build_for_xmakefile(package)
 
     -- build it
     os.vrun("xmake -r")
+
+    -- ok
+    return true
 end
 
 -- build for makefile
-function _build_for_makefile(package)
+function _build_for_makefile(package, buildfile)
 
     -- build it
     os.vrun("make")
+
+    -- ok
+    return true
 end
 
 -- build for configure
-function _build_for_configure(package)
+function _build_for_configure(package, buildfile)
 
     -- configure it first
     os.vrun("./configure")
 
     -- build it
-    _build_for_makefile(package)
+    return _build_for_makefile(package)
 end
 
 -- build for cmakelist
-function _build_for_cmakelists(package)
+function _build_for_cmakelists(package, buildfile)
 
     -- make makefile first
     os.vrun("cmake .")
 
     -- build it
-    _build_for_makefile(package)
+    return _build_for_makefile(package)
+end
+
+-- build for *.sln
+function _build_for_sln(package, buildfile)
+
+    -- build it for windows
+    if config.plat() == "windows" then
+        os.vrun("msbuild %s -nologo -t:Rebuild -p:Configuration=Release", buildfile)
+        return true
+    end
+    return false
 end
 
 -- on build the given package
@@ -78,6 +95,7 @@ function _on_build_package(package)
     local buildscripts =
     {
         {"xmake.lua",       _build_for_xmakefile    }
+    ,   {"*.sln",           _build_for_sln          }
     ,   {"CMakeLists.txt",  _build_for_cmakelists   }
     ,   {"configure",       _build_for_configure    }
     ,   {"[mM]akefile",     _build_for_makefile     }
@@ -97,8 +115,7 @@ function _on_build_package(package)
                 -- attempt to build it if file exists
                 local files = os.files(buildscript[1])
                 if #files > 0 then
-                    buildscript[2](package)
-                    return true
+                    return buildscript[2](package, files[1])
                 end
             end,
 
