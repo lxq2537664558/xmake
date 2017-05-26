@@ -37,29 +37,37 @@ function _checkout(package, url, sourcedir)
         print("")
     end
 
-    -- remove source directory first
-    os.rm(sourcedir)
+    -- use previous source directory if exists
+    local packagedir = path.join(sourcedir, package:name())
+    if os.isdir(packagedir) and not option.get("force") then
 
-    -- init package directory
-    sourcedir = path.join(sourcedir, package:name() .. '-' .. package:version_str())
+        -- clean the previous build files
+        git.clean({repodir = packagedir, force = true})
+        cprint("${green}ok")
+        return 
+    end
+
+    -- remove temporary directory
+    os.rm(sourcedir .. ".tmp")
 
     -- create a clone task
+    packagedir = path.join(sourcedir .. ".tmp", package:name())
     local task = function ()
 
         -- from branches?
         if package:version_from("branches") then
 
             -- only shadow clone this branch 
-            git.clone(url, {depth = 1, branch = package:version_str(), outputdir = sourcedir})
+            git.clone(url, {depth = 1, branch = package:version_str(), outputdir = packagedir})
 
         -- from tags or versions?
         else
 
             -- clone whole history and tags
-            git.clone(url, {outputdir = sourcedir})
+            git.clone(url, {outputdir = packagedir})
 
             -- attempt to checkout the given version
-            git.checkout(package:version_str(), {repodir = sourcedir})
+            git.checkout(package:version_str(), {repodir = packagedir})
         end
     end
 
@@ -69,6 +77,10 @@ function _checkout(package, url, sourcedir)
     else
         process.asyncrun(task)
     end
+ 
+    -- move to source directory
+    os.rm(sourcedir)
+    os.mv(sourcedir .. ".tmp", sourcedir)
 
     -- trace
     cprint("${green}ok")
@@ -111,12 +123,14 @@ function _download(package, url, sourcedir)
         end
     end
 
-    -- remove source directory first
-    os.rm(sourcedir)
-
     -- extract package file
-    archive.extract(packagefile, sourcedir)
+    os.rm(sourcedir .. ".tmp")
+    archive.extract(packagefile, sourcedir .. ".tmp")
     
+    -- move to source directory
+    os.rm(sourcedir)
+    os.mv(sourcedir .. ".tmp", sourcedir)
+
     -- trace
     cprint("${green}ok")
 end
@@ -154,27 +168,13 @@ function main(package)
         {
             function ()
 
-                -- init source files directory
-                local sourcedir = "source"
-                local sourcedir_tmp = sourcedir .. ".tmp"
-
-                -- has been finished?
-                if os.isdir(sourcedir) and not option.get("force") then
-                    return true 
-                end
-
                 -- download package 
+                local sourcedir = "source"
                 if git.checkurl(url) then
-                    _checkout(package, url, sourcedir_tmp)
+                    _checkout(package, url, sourcedir)
                 else
-                    _download(package, url, sourcedir_tmp)
+                    _download(package, url, sourcedir)
                 end
-
-                -- remove the previous source directory
-                os.rm(sourcedir)
-
-                -- rename source directory
-                os.mv(sourcedir_tmp, sourcedir)
 
                 -- ok
                 return true
