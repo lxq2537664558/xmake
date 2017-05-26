@@ -197,9 +197,9 @@ function main(package)
             -- the package scripts
             local scripts =
             {
-                package:get("build_before") 
-            ,   package:get("build")  or _on_build_package
-            ,   package:get("build_after") 
+                package:script("build_before") 
+            ,   package:script("build", _on_build_package)
+            ,   package:script("build_after") 
             }
 
             -- run the package scripts

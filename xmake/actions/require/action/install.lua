@@ -51,9 +51,9 @@ function main(package, cachedir)
     -- the package scripts
     local scripts =
     {
-        package:get("install_before") 
-    ,   package:get("install")  or _on_install_package
-    ,   package:get("install_after") 
+        package:script("install_before") 
+    ,   package:script("install", _on_install_package)
+    ,   package:script("install_after") 
     }
 
     -- run the package scripts

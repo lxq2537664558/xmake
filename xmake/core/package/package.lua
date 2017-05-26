@@ -181,6 +181,39 @@ function _instance:requireinfo_set(requireinfo)
     self._REQUIREINFO = requireinfo
 end
 
+-- get xxx_script
+function _instance:script(name, generic)
+
+    -- get script
+    local script = self:get(name)
+    if type(script) == "function" then
+        return script
+    elseif type(script) == "table" then
+
+        -- match script for special plat and arch
+        local plat = (config.get("plat") or "")
+        local pattern = plat .. '|' .. (config.get("arch") or "")
+        for _pattern, _script in pairs(script) do
+            if not _pattern:startswith("__") and pattern:find('^' .. _pattern .. '$') then
+                return _script
+            end
+        end
+
+        -- match script for special plat
+        for _pattern, _script in pairs(script) do
+            if not _pattern:startswith("__") and plat:find('^' .. _pattern .. '$') then
+                return _script
+            end
+        end
+
+        -- get generic script
+        return script["__generic__"] or generic
+    end
+
+    -- only generic script
+    return generic
+end
+
 -- the interpreter
 function package._interpreter()
 
