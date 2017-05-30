@@ -46,6 +46,7 @@ xmake_C_FILES 			+= \
 						path/is_absolute \
 						hash/uuid \
 						hash/sha256 \
+						winreg/query \
 						string/strcmp \
 						string/endswith \
 						string/startswith \
