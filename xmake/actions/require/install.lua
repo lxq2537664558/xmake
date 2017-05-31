@@ -23,6 +23,7 @@
 --
 
 -- imports
+import("core.base.option")
 import("core.project.project")
 import("action")
 import("package")
@@ -39,8 +40,49 @@ function main(requires)
     -- pull all repositories first
     repository.pull()
 
+    -- load packages
+    local packages = package.load_packages(requires or project.requires())
+
+    -- download packages
+    local waitindex = 0
+    local waitchars = {'\\', '|', '/', '-'}
+    process.runjobs(function (index)
+
+        local instance = packages[index]
+        if instance then
+
+            -- download package
+            action.download(instance, package.cachedir())
+        end
+
+    end, #packages, ifelse(option.get("verbose"), 1, 4), 300, function (indices) 
+
+        -- do not print progress info if be verbose 
+        if option.get("verbose") then
+            return 
+        end
+ 
+        -- update waitchar index
+        waitindex = ((waitindex + 1) % #waitchars)
+
+        -- make downloading packages list
+        local downloading = {}
+        for _, index in ipairs(indices) do
+            local instance = packages[index]
+            if instance then
+                table.insert(downloading, instance:name())
+            end
+        end
+       
+        -- trace
+        cprintf("\r${yellow}  => ${clear}downloading %s .. %s", table.concat(downloading, ", "), waitchars[waitindex + 1])
+    end)
+
     -- install all required packages from repositories
-    for _, instance in ipairs(package.load_packages(requires or project.requires())) do
+    for _, instance in ipairs(packages) do
+
+        -- build package
+        action.build(instance, package.cachedir())
 
         -- install package
         action.install(instance, package.cachedir())

@@ -169,24 +169,27 @@ function _run_script(script, package)
 end
 
 -- build the given package
-function main(package)
+function main(package, cachedir)
 
     -- skip phony package without urls
     if #package:urls() == 0 then
         return
     end
 
+    -- get working directory of this package
+    local workdir = path.join(cachedir, package:name() .. "-" .. (package:version_str() or "group"))
+
+    -- enter source files directory
+    local oldir = nil
+    for _, srcdir in ipairs(os.dirs(path.join(workdir, "source", "*"))) do
+        oldir = os.cd(srcdir)
+        break
+    end
+
     -- trace
     cprintf("${yellow}  => ${clear}building %s-%s .. ", package:name(), package:version_str())
     if option.get("verbose") then
         print("")
-    end
-
-    -- enter source files directory
-    local oldir = nil
-    for _, srcdir in ipairs(os.dirs("source/*")) do
-        oldir = os.cd(srcdir)
-        break
     end
 
     -- build it

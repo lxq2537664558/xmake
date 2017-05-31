@@ -22,10 +22,6 @@
 -- @file        install.lua
 --
 
--- imports
-import("build")
-import("download")
-
 -- on install the given package
 function _on_install_package(package)
 end
@@ -33,20 +29,16 @@ end
 -- install the given package
 function main(package, cachedir)
 
+    -- skip phony package without urls
+    if #package:urls() == 0 then
+        return
+    end
+
     -- get working directory of this package
     local workdir = path.join(cachedir, package:name() .. "-" .. (package:version_str() or "group"))
 
-    -- ensure the working directory first
-    os.mkdir(workdir)
-
     -- enter the working directory
     local oldir = os.cd(workdir)
-
-    -- download package first
-    download(package)
-
-    -- build package 
-    build(package)
 
     -- the package scripts
     local scripts =

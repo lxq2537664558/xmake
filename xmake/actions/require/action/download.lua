@@ -28,14 +28,13 @@ import("net.http")
 import("devel.git")
 import("utils.archive")
 
+-- empty chars
+function _emptychars()
+    return "                               "
+end
+
 -- checkout codes from git
 function _checkout(package, url, sourcedir)
-
-    -- trace
-    cprintf("${yellow}  => ${clear}cloning %s %s .. ", url, package:version_str())
-    if option.get("verbose") then
-        print("")
-    end
 
     -- use previous source directory if exists
     local packagedir = path.join(sourcedir, package:name())
@@ -43,39 +42,27 @@ function _checkout(package, url, sourcedir)
 
         -- clean the previous build files
         git.clean({repodir = packagedir, force = true})
-        cprint("${green}ok")
         return 
     end
 
     -- remove temporary directory
     os.rm(sourcedir .. ".tmp")
 
-    -- create a clone task
+    -- download package from branches?
     packagedir = path.join(sourcedir .. ".tmp", package:name())
-    local task = function ()
+    if package:version_from("branches") then
 
-        -- from branches?
-        if package:version_from("branches") then
+        -- only shadow clone this branch 
+        git.clone(url, {depth = 1, branch = package:version_str(), outputdir = packagedir})
 
-            -- only shadow clone this branch 
-            git.clone(url, {depth = 1, branch = package:version_str(), outputdir = packagedir})
-
-        -- from tags or versions?
-        else
-
-            -- clone whole history and tags
-            git.clone(url, {outputdir = packagedir})
-
-            -- attempt to checkout the given version
-            git.checkout(package:version_str(), {repodir = packagedir})
-        end
-    end
-
-    -- download package file
-    if option.get("verbose") then
-        task()
+    -- download package from tags or versions?
     else
-        process.asyncrun(task)
+
+        -- clone whole history and tags
+        git.clone(url, {outputdir = packagedir})
+
+        -- attempt to checkout the given version
+        git.checkout(package:version_str(), {repodir = packagedir})
     end
  
     -- move to source directory
@@ -83,17 +70,11 @@ function _checkout(package, url, sourcedir)
     os.mv(sourcedir .. ".tmp", sourcedir)
 
     -- trace
-    cprint("${green}ok")
+    cprint("\r${yellow}  => ${clear}clone %s %s .. ${green}ok%s", url, package:version_str(), _emptychars())
 end
 
 -- download codes from ftp/http/https
 function _download(package, url, sourcedir)
-
-    -- trace
-    cprintf("${yellow}  => ${clear}downloading %s .. ", url)
-    if option.get("verbose") then
-        print("")
-    end
 
     -- get package file
     local packagefile = path.filename(url)
@@ -105,17 +86,8 @@ function _download(package, url, sourcedir)
         -- attempt to remove package file first
         os.rm(packagefile)
 
-        -- create a download task
-        local task = function ()
-            http.download(url, packagefile)
-        end
-
         -- download package file
-        if option.get("verbose") then
-            task()
-        else
-            process.asyncrun(task)
-        end
+        http.download(url, packagefile)
 
         -- check hash
         if sha256 and sha256 ~= hash.sha256(packagefile) then
@@ -132,7 +104,7 @@ function _download(package, url, sourcedir)
     os.mv(sourcedir .. ".tmp", sourcedir)
 
     -- trace
-    cprint("${green}ok")
+    cprint("\r${yellow}  => ${clear}download %s .. ${green}ok%s", url, _emptychars())
 end
 
 -- get sorted urls
@@ -155,7 +127,21 @@ function _urls(package)
 end
 
 -- download the given package
-function main(package)
+function main(package, cachedir)
+
+    -- skip phony package without urls
+    if #package:urls() == 0 then
+        return
+    end
+
+    -- get working directory of this package
+    local workdir = path.join(cachedir, package:name() .. "-" .. (package:version_str() or "group"))
+
+    -- ensure the working directory first
+    os.mkdir(workdir)
+
+    -- enter the working directory
+    local oldir = os.cd(workdir)
 
     -- download package from urls
     for idx, url in ipairs(_urls(package)) do
@@ -189,7 +175,11 @@ function main(package)
                     end
 
                     -- trace
-                    cprint("${red}failed")
+                    if git.checkurl(url) then
+                        cprint("\r${yellow}  => ${clear}clone %s %s .. ${red}failed%s", url, package:version_str(), _emptychars())
+                    else
+                        cprint("\r${yellow}  => ${clear}download %s .. ${red}failed%s", url, _emptychars())
+                    end
 
                     -- failed? break it
                     if idx == #urls then
@@ -202,5 +192,9 @@ function main(package)
         -- ok? break it
         if ok then break end
     end
+
+    -- leave working directory
+    os.cd(oldir)
 end
+
 
