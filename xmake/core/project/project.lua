@@ -312,11 +312,11 @@ function project._interpreter()
             local maps = 
             {
                 os          = platform.os()
-            ,   host        = xmake._HOST
+            ,   host        = os.host()
             ,   prefix      = "$(prefix)"
-            ,   tmpdir      = os.tmpdir()
-            ,   curdir      = os.curdir()
-            ,   scriptdir   = sandbox_os.scriptdir()
+            ,   tmpdir      = function () return os.tmpdir() end
+            ,   curdir      = function () return os.curdir() end
+            ,   scriptdir   = function () return sandbox_os.scriptdir() end
             ,   globaldir   = global.directory()
             ,   configdir   = config.directory()
             ,   projectdir  = project.directory()
@@ -325,6 +325,9 @@ function project._interpreter()
 
             -- map it
             result = maps[variable]
+            if type(result) == "function" then
+                result = result()
+            end
         end
 
         -- ok?
