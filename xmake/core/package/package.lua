@@ -127,11 +127,26 @@ function _instance:sha256()
     return self._SHA256
 end
 
+-- is global package?
+function _instance:global()
+    return self._ISGLOBAL
+end
+
 -- is optional package?
 function _instance:optional()
 
     -- optional?
     return self._REQUIREINFO.mode == "optional"
+end
+
+-- get the cached directory of this package
+function _instance:cachedir()
+    return path.join(package.cachedir(), self:name() .. "-" .. (self:version_str() or "group"))
+end
+
+-- get the installed directory of this package
+function _instance:installdir()
+    return path.join(package.installdir(self:global()), self:name() .. "-" .. (self:version_str() or "group"))
 end
 
 -- get the version  
@@ -272,8 +287,8 @@ function package.apis()
     }
 end
 
--- get the local or global package directory
-function package.directory(is_global)
+-- get install directory
+function package.installdir(is_global)
 
     -- get directory
     if is_global then
@@ -282,7 +297,12 @@ function package.directory(is_global)
         return path.join(config.directory(), "packages")
     end
 end
-  
+
+-- the cache directory
+function package.cachedir()
+    return path.join(global.directory(), "cache", "packages")
+end
+
 -- load the package from the package url
 function package.load_from_url(packagename, packageurl)
 
@@ -302,7 +322,7 @@ function package.load_from_url(packagename, packageurl)
     end
 
     -- load package instance
-    local instance, errors = package.load_from_repository(packagename, nil, packagefile)
+    local instance, errors = package.load_from_repository(packagename, false, nil, packagefile)
 
     -- remove the package file
     os.rm(packagefile)
@@ -340,6 +360,9 @@ function package.load_from_project(packagename)
         return nil, errors
     end
 
+    -- mark as loval package
+    instance._ISGLOBAL = false
+
     -- save instance to the cache
     package._PACKAGES[packagename] = instance
 
@@ -348,7 +371,7 @@ function package.load_from_project(packagename)
 end
 
 -- load the package from the package directory or package description file
-function package.load_from_repository(packagename, packagedir, packagefile)
+function package.load_from_repository(packagename, is_global, packagedir, packagefile)
 
     -- get it directly from cache first
     package._PACKAGES = package._PACKAGES or {}
@@ -381,6 +404,9 @@ function package.load_from_repository(packagename, packagedir, packagefile)
     if not instance then
         return nil, errors
     end
+
+    -- mark as global package?
+    instance._ISGLOBAL = is_global
 
     -- save instance to the cache
     package._PACKAGES[packagename] = instance

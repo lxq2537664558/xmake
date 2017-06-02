@@ -127,7 +127,7 @@ function _urls(package)
 end
 
 -- download the given package
-function main(package, cachedir)
+function main(package)
 
     -- skip phony package without urls
     if #package:urls() == 0 then
@@ -135,7 +135,7 @@ function main(package, cachedir)
     end
 
     -- get working directory of this package
-    local workdir = path.join(cachedir, package:name() .. "-" .. (package:version_str() or "group"))
+    local workdir = package:cachedir()
 
     -- ensure the working directory first
     os.mkdir(workdir)

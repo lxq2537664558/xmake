@@ -24,7 +24,7 @@
 
 -- imports
 import("core.project.cache")
-import("package")
+import("core.package.package")
 
 -- clear all installed package caches
 function main()

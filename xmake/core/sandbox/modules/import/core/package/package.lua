@@ -29,9 +29,14 @@ local sandbox_core_package_package = sandbox_core_package_package or {}
 local package    = require("package/package")
 local raise      = require("sandbox/modules/raise")
 
--- get package directory
-function sandbox_core_package_package.directory(is_global)
-    return package.directory(is_global)
+-- get cache directory
+function sandbox_core_package_package.cachedir()
+    return package.cachedir()
+end
+
+-- get install directory
+function sandbox_core_package_package.installdir(is_global)
+    return package.installdir(is_global)
 end
 
 -- load the package from the project file 
@@ -48,10 +53,10 @@ function sandbox_core_package_package.load_from_project(packagename)
 end
 
 -- load the package from repositories
-function sandbox_core_package_package.load_from_repository(packagename, packagedir, packagefile)
+function sandbox_core_package_package.load_from_repository(packagename, is_global, packagedir, packagefile)
 
     -- load package instance
-    local instance, errors = package.load_from_repository(packagename, packagedir, packagefile) 
+    local instance, errors = package.load_from_repository(packagename, is_global, packagedir, packagefile) 
     if not instance then
         raise(errors)
     end

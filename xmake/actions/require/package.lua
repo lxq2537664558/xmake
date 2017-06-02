@@ -149,10 +149,10 @@ end
 function _load_package_from_repository(packagename, reponame)
 
     -- get package directory from the given package name
-    local packagedir = repository.packagedir(packagename, reponame)
+    local packagedir, is_global = repository.packagedir(packagename, reponame)
     if packagedir then
         -- load it
-        return core_package.load_from_repository(packagename, packagedir)
+        return core_package.load_from_repository(packagename, is_global, packagedir)
     end
 end
 

@@ -52,7 +52,7 @@ function main(requires)
         if instance then
 
             -- download package
-            action.download(instance, package.cachedir())
+            action.download(instance)
         end
 
     end, #packages, ifelse(option.get("verbose"), 1, 4), 300, function (indices) 
@@ -82,10 +82,10 @@ function main(requires)
     for _, instance in ipairs(packages) do
 
         -- build package
-        action.build(instance, package.cachedir())
+        action.build(instance)
 
         -- install package
-        action.install(instance, package.cachedir())
+        action.install(instance)
     end
 
     -- leave environment

@@ -27,7 +27,6 @@ import("core.base.option")
 import("core.tool.tool")
 import("core.project.config")
 import("core.sandbox.sandbox")
-import(".environment")
 
 -- build for xmake file
 function _build_for_xmakefile(package, buildfile)
@@ -169,7 +168,7 @@ function _run_script(script, package)
 end
 
 -- build the given package
-function main(package, cachedir)
+function main(package)
 
     -- skip phony package without urls
     if #package:urls() == 0 then
@@ -177,7 +176,7 @@ function main(package, cachedir)
     end
 
     -- get working directory of this package
-    local workdir = path.join(cachedir, package:name() .. "-" .. (package:version_str() or "group"))
+    local workdir = package:cachedir()
 
     -- enter source files directory
     local oldir = nil
@@ -205,7 +204,7 @@ function main(package, cachedir)
             ,   package:script("build_after") 
             }
 
-            -- run the package scripts
+            -- create the build tasks
             local buildtask = function () 
 
                 -- build it
@@ -217,7 +216,7 @@ function main(package, cachedir)
                 end
             end
 
-            -- download package file
+            -- build package 
             if option.get("verbose") then
                 buildtask()
             else

@@ -103,17 +103,23 @@ function packagedir(packagename, reponame)
 
     -- get it from cache it
     local packagedirs = _g._PACKAGEDIRS or {}
-    if packagedirs[packagename] then
-        return packagedirs[packagename]
+    local foundir = packagedirs[packagename]
+    if foundir then
+        return foundir[1], foundir[2]
     end
 
     -- find the package directory from the given repository 
-    local foundir = nil
     if reponame then
-        for _, repodir in ipairs(table.join(repository.directory(false), repository.directory(true))) do
-            local dir = path.join(repodir, reponame, "packages", (packagename:gsub('%.', path.seperator())))
-            if os.isdir(dir) then
-                foundir = dir 
+        for _, from in ipairs({"local", "global"}) do
+            local is_global = (from == "global")
+            for _, repodir in ipairs(repository.directory(is_global)) do
+                local dir = path.join(repodir, reponame, "packages", (packagename:gsub('%.', path.seperator())))
+                if os.isdir(dir) then
+                    foundir = {dir, is_global} 
+                    break
+                end
+            end
+            if foundir then
                 break
             end
         end
@@ -124,7 +130,7 @@ function packagedir(packagename, reponame)
             -- the package directory
             local dir = path.join(repository.directory(repo.global), repo.name, "packages", (packagename:gsub('%.', path.seperator())))
             if os.isdir(dir) then
-                foundir = dir 
+                foundir = {dir, repo.global}
                 break
             end
         end
@@ -141,6 +147,6 @@ function packagedir(packagename, reponame)
     end
 
     -- ok
-    return foundir
+    return foundir[1], foundir[2]
 end
 
