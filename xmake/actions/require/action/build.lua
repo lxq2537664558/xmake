@@ -170,81 +170,25 @@ end
 -- build the given package
 function main(package)
 
-    -- skip phony package without urls
-    if #package:urls() == 0 then
-        return
-    end
-
-    -- get working directory of this package
-    local workdir = package:cachedir()
-
-    -- enter source files directory
-    local oldir = nil
-    for _, srcdir in ipairs(os.dirs(path.join(workdir, "source", "*"))) do
-        oldir = os.cd(srcdir)
-        break
-    end
-
-    -- trace
-    cprintf("${yellow}  => ${clear}building %s-%s .. ", package:name(), package:version_str())
-    if option.get("verbose") then
-        print("")
-    end
-
-    -- build it
-    try
+    -- the package scripts
+    local scripts =
     {
-        function ()
-
-            -- the package scripts
-            local scripts =
-            {
-                package:script("build_before") 
-            ,   package:script("build", _on_build_package)
-            ,   package:script("build_after") 
-            }
-
-            -- create the build tasks
-            local buildtask = function () 
-
-                -- build it
-                for i = 1, 3 do
-                    local script = scripts[i]
-                    if script ~= nil then
-                        _run_script(script, package)
-                    end
-                end
-            end
-
-            -- build package 
-            if option.get("verbose") then
-                buildtask()
-            else
-                process.asyncrun(buildtask)
-            end
-
-            -- trace
-            cprint("${green}ok")
-        end,
-
-        catch
-        {
-            function (errors)
-
-                -- verbose?
-                if option.get("verbose") and errors then
-                    cprint("${bright red}error: ${clear}%s", errors)
-                end
-
-                -- trace
-                cprint("${red}failed")
-
-                -- failed
-                raise("build failed!")
-            end
-        }
+        package:script("build_before") 
+    ,   package:script("build", _on_build_package)
+    ,   package:script("build_after") 
     }
 
-    -- leave source codes directory
+    -- save the current directory
+    local oldir = os.curdir()
+
+    -- build it
+    for i = 1, 3 do
+        local script = scripts[i]
+        if script ~= nil then
+            _run_script(script, package)
+        end
+    end
+
+    -- restore the current directory
     os.cd(oldir)
 end

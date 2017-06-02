@@ -24,6 +24,7 @@
 
 -- imports
 import("core.base.option")
+import("build")
 
 -- install for xmake file
 function _install_for_xmakefile(package, installfile)
@@ -157,6 +158,9 @@ function main(package)
             local installtask = function () 
 
                 -- build it
+                build(package)
+
+                -- install it
                 for i = 1, 3 do
                     local script = scripts[i]
                     if script ~= nil then

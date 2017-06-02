@@ -80,11 +80,6 @@ function main(requires)
 
     -- install all required packages from repositories
     for _, instance in ipairs(packages) do
-
-        -- build package
-        action.build(instance)
-
-        -- install package
         action.install(instance)
     end
 
