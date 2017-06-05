@@ -61,8 +61,8 @@ function _install_for_generic(package)
     end
 
     -- install the library files and ignore hidden files (.xxx)
-    if not os.trycp(prefixdir .. target.filename("**", "static"), linkdir) and 
-       not os.trycp(prefixdir .. target.filename("**", "shared"), linkdir) then
+    if not os.trycp(prefixdir .. "**" .. target.filename("*", "static"), linkdir) and 
+       not os.trycp(prefixdir .. "**" .. target.filename("*", "shared"), linkdir) then
         raise("the library files not found in package %s", name)
     end
 
