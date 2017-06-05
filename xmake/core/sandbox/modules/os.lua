@@ -98,6 +98,32 @@ function sandbox_os.rm(...)
     end
 end
 
+-- try to copy file or directory
+function sandbox_os.trycp(...)
+    
+    -- format arguments
+    local args = {}
+    for _, arg in ipairs({...}) do
+        table.insert(args, vformat(arg))
+    end
+
+    -- done
+    return os.cp(unpack(args))
+end
+
+-- try to move file or directory
+function sandbox_os.trymv(...)
+    
+    -- format arguments
+    local args = {}
+    for _, arg in ipairs({...}) do
+        table.insert(args, vformat(arg))
+    end
+
+    -- done
+    return os.mv(unpack(args))
+end
+
 -- try to remove files or directories
 function sandbox_os.tryrm(...)
     
@@ -108,7 +134,7 @@ function sandbox_os.tryrm(...)
     end
 
     -- remove it
-    os.rm(unpack(args))
+    return os.rm(unpack(args))
 end
 
 -- change to directory

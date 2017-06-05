@@ -24,10 +24,11 @@
 
 -- imports
 import("core.base.option")
+import("core.project.target")
 import("build")
 
 -- install for xmake file
-function _install_for_xmakefile(package, installfile)
+function _install_for_xmakefile(package)
 
     -- package to install directory
     os.vrun("xmake p -o %s", package:installdir())
@@ -36,44 +37,100 @@ function _install_for_xmakefile(package, installfile)
     return true
 end
 
--- install for makefile
-function _install_for_makefile(package, installfile)
+-- install for generic
+function _install_for_generic(package)
+
+    -- the package name
+    local name = package:name()
+
+    -- the install directory
+    local installdir = path.join(package:installdir(), name .. ".pkg")
+
+    -- the linkdir
+    local linkdir = path.join(installdir, "lib/$(mode)/$(plat)/$(arch)")
+    os.mkdir(linkdir)
+
+    -- the includedir 
+    local includedir = path.join(installdir, "inc")
+    os.mkdir(includedir)
+
+    -- the prefix directory exists?
+    local prefixdir = ""
+    if os.isdir(".prefix") and not os.emptydir(".prefix") then
+        prefixdir = ".prefix" .. path.seperator()
+    end
+
+    -- install the library files and ignore hidden files (.xxx)
+    if not os.trycp(prefixdir .. target.filename("**", "static"), linkdir) and 
+       not os.trycp(prefixdir .. target.filename("**", "shared"), linkdir) then
+        raise("the library files not found in package %s", name)
+    end
+
+    -- install the header files
+    for _, headerfile in ipairs(table.join((os.files(prefixdir .. "**.h")), (os.files(prefixdir .. "**.hpp")))) do
+
+        -- the destinate header
+        local dstheaderfile = nil
+        if #prefixdir > 0 then
+            dstheaderfile = path.absolute(path.relative(headerfile, path.join(prefixdir, "include")), includedir)
+        else
+            dstheaderfile = path.join(includedir, path.filename(headerfile))
+        end
+
+        -- install header file
+        os.cp(headerfile, dstheaderfile)
+    end
+
+    -- make xmake.lua 
+    local file = io.open(path.join(installdir, "xmake.lua"), "w")
+    if file then
+
+        -- the xmake.lua content
+        local content = [[ 
+-- the %s package
+option("%s")
+
+    -- show menu
+    set_showmenu(true)
+
+    -- set category
+    set_category("package")
+
+    -- set description
+    set_description("The %s package")
+
+    -- add defines to config.h if checking ok
+    add_defines_h_if_ok("$(prefix)_PACKAGE_HAVE_%s")
+
+    -- add links for checking
+    add_links("%s")
+
+    -- add link directories
+    add_linkdirs("lib/$(mode)/$(plat)/$(arch)")
+
+    -- add include directories
+    add_includedirs("inc")
+]]
+
+        -- save file
+        file:writef(content, name, name, name, name:upper(), name)
+
+        -- exit file
+        file:close()
+    end
 
     -- ok
     return true
 end
 
--- install for configure
-function _install_for_configure(package, installfile)
-
-    -- install it
-    return _install_for_makefile(package)
-end
-
--- install for cmakelist
-function _install_for_cmakelists(package, installfile)
-
-    -- install it
-    return _install_for_makefile(package)
-end
-
--- install for *.sln
-function _install_for_sln(package, installfile)
-    return false
-end
-
 -- on install the given package
 function _on_install_package(package)
 
-    -- TODO *.vcproj, premake.lua, scons, autogen.sh, Makefile.am, ...
     -- init install scripts
     local installscripts =
     {
         {"xmake.lua",       _install_for_xmakefile    }
-    ,   {"*.sln",           _install_for_sln          }
-    ,   {"CMakeLists.txt",  _install_for_cmakelists   }
-    ,   {"configure",       _install_for_configure    }
-    ,   {"[mM]akefile",     _install_for_makefile     }
+    ,   {"*",               _install_for_generic      }
     }
 
     -- attempt to install it
@@ -90,7 +147,7 @@ function _on_install_package(package)
                 -- attempt to install it if file exists
                 local files = os.files(installscript[1])
                 if #files > 0 then
-                    return installscript[2](package, files[1])
+                    return installscript[2](package)
                 end
             end,
 

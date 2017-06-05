@@ -32,11 +32,7 @@ import("core.sandbox.sandbox")
 function _build_for_xmakefile(package, buildfile)
 
     -- configure it first
-    if config.plat() and config.arch() then
-        os.vrun("xmake f -p $(plat) -a $(arch) -c")
-    else
-        os.vrun("xmake f -c")
-    end
+    os.vrun("xmake f -p $(plat) -a $(arch) -m $(mode) -c")
 
     -- build it
     os.vrun("xmake -r")
@@ -58,21 +54,36 @@ end
 -- build for configure
 function _build_for_configure(package, buildfile)
 
+    -- make prefix directory
+    os.mkdir(".prefix")
+
     -- configure it first
-    os.vrun("./configure")
+    os.vrun("./configure --prefix=%s", path.absolute(".prefix"))
 
     -- build it
-    return _build_for_makefile(package)
+    os.vrun("make")
+
+    -- install to .prefix
+    os.vrun("make install")
+
+    -- ok
+    return true
 end
 
 -- build for cmakelist
 function _build_for_cmakelists(package, buildfile)
 
     -- make makefile first
-    os.vrun("cmake .")
+    os.vrun("cmake -DCMAKE_INSTALL_PREFIX=%s .", path.absolute(".prefix"))
 
     -- build it
-    return _build_for_makefile(package)
+    os.vrun("make")
+
+    -- install to .prefix
+    os.vrun("make install")
+
+    -- ok
+    return true
 end
 
 -- build for *.sln
