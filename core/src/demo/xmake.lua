@@ -39,8 +39,8 @@ target("demo")
         add_ldflags("-all_load", "-pagezero_size 10000", "-image_base 100000000")
     end
 
-    -- add the resource files 
+    -- add the resource files (it will be enabled after publishing new version)
     if is_plat("windows") then
-        add_files("*.rc")
+--        add_files("*.rc")
     end
 
