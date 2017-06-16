@@ -47,7 +47,6 @@ xmake_C_FILES 			+= \
 						hash/uuid \
 						hash/sha256 \
 						winreg/query \
-						string/strcmp \
 						string/endswith \
 						string/startswith \
 						process/open \
