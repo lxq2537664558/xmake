@@ -111,9 +111,6 @@ function _toolchains(config)
     checker.toolchain_insert(toolchains, "rc-sh", "",                   "rustc",      "the rust shared library linker")
     checker.toolchain_insert(toolchains, "rc-ld", "",                   "rustc",      "the rust linker")
 
-    -- insert other tools to toolchains
-    checker.toolchain_insert(toolchains, "debugger",    "xcrun -sdk macosx ",   "lldb",         "the debugger") 
-
     -- save toolchains
     _g.TOOLCHAINS = toolchains
 
