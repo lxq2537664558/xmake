@@ -60,7 +60,7 @@ function sandbox_core_project.check(force)
     end
 
     -- get sandbox instance
-    local instance = sandbox:instance()
+    local instance = sandbox.instance()
     assert(instance)
 
     -- enter toolchains environment
