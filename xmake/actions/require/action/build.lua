@@ -24,7 +24,6 @@
 
 -- imports
 import("core.base.option")
-import("core.tool.tool")
 import("core.project.config")
 import("core.sandbox.sandbox")
 
@@ -155,27 +154,16 @@ end
 -- run script
 function _run_script(script, package)
 
+    -- TODO
     -- register filter handler before building
-    sandbox.filter_register(script, "package.build", function (var) 
-        
-        -- attempt to get shellname from tool
-        --
-        -- .e.g $(cc) $(ld) $(ar) ..
-        --
-        local shellname = tool.shellname(var)
-        if shellname then
-            result = shellname
-        end
-
-        -- ok
-        return shellname
-    end)
+--    sandbox.filter_register(script, "package.build", function (var) 
+--    end)
 
     -- run it
     script(package)
 
     -- cancel filter handler before building
-    sandbox.filter_register(script, "package.build", nil)
+--    sandbox.filter_register(script, "package.build", nil)
 end
 
 -- build the given package
