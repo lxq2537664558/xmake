@@ -23,7 +23,7 @@
 --
 
 -- imports
-import("detect.tool.find_ping")
+import("detect.tools.find_ping")
 
 -- send ping to hosts
 --

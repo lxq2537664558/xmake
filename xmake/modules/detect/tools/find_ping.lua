@@ -26,19 +26,23 @@
 import("lib.detect.find_program")
 
 -- find ping 
-function main()
-    
-    -- find program
-    local program = find_program(   "ping"
-                                ,   { "/usr/bin", "/usr/local/bin"}
-                                ,   function (program) 
-                                        if os.host() == "windows" then
-                                            os.run("%s -n 1 127.0.0.1", program)
-                                        else
-                                            os.run("%s -c 1 127.0.0.1", program)
-                                        end
-                                    end)
+--
+--
+-- @param opt   the argument options
+--
+-- @return      program
+--
+function main(opt)
 
-    -- ok?
-    return program
+    -- init options
+    opt = opt or {}
+
+    -- find program
+    return find_program(opt.program or "ping", opt.pathes, opt.check or function (program) 
+                                                                            if os.host() == "windows" then
+                                                                                os.run("%s -n 1 127.0.0.1", program)
+                                                                            else
+                                                                                os.run("%s -c 1 127.0.0.1", program)
+                                                                            end
+                                                                        end)
 end
