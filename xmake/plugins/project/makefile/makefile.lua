@@ -200,11 +200,7 @@ function _make_single_object(makefile, target, sourcekind, sourcebatch)
 
     -- make body
     for _, sourcefile in ipairs(sourcefiles) do
-<<<<<<< HEAD
-        makefile:print("\t@echo %scompiling.$(mode) %s", ifelse(tool.shellname("ccache"), "ccache ", ""), sourcefile)
-=======
         makefile:print("\t@echo %scompiling.$(mode) %s", ifelse(ccache, "ccache ", ""), sourcefile)
->>>>>>> c354c862... remove old ccache tools
     end
     _mkdir(makefile, path.directory(objectfiles))
     makefile:writef("\t@%s > %s 2>&1\n", command, _logfile())
