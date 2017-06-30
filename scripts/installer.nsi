@@ -44,6 +44,13 @@ RequestExecutionLevel admin
 
 !insertmacro MUI_UNPAGE_CONFIRM
 !insertmacro MUI_UNPAGE_INSTFILES
+ 
+;--------------------------------
+; Finish Pages
+
+!define MUI_FINISHPAGE_LINK "Donate $$5"
+!define MUI_FINISHPAGE_LINK_LOCATION "http://xmake.io/pages/donation.html#donate"
+!insertmacro MUI_PAGE_FINISH
 
 ;--------------------------------
 ; Languages
