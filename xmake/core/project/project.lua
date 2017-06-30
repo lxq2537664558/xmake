@@ -264,6 +264,10 @@ function project._interpreter()
         ,   "target.after_package"
         ,   "target.after_install"
         ,   "target.after_uninstall"
+            -- option.on_xxx
+        ,   "option.on_check"
+            -- target.on_xxx
+        ,   "task.on_run"
         }
     ,   custom = 
         {
