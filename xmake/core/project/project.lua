@@ -40,6 +40,7 @@ local global                = require("project/global")
 local option                = require("project/option")
 local deprecated_project    = require("project/deprecated/project")
 local platform              = require("platform/platform")
+local environment           = require("platform/environment")
 local language              = require("language/language")
 local sandbox_os            = require("sandbox/modules/os")
 
@@ -448,19 +449,25 @@ function project.load()
     -- save targets
     project._TARGETS = targets
 
+    -- enter toolchains environment
+    environment.enter("toolchains")
+
     -- on load for each target
     for _, target in pairs(targets) do
         local on_load = target:script("load")
         if on_load then
             ok, errors = sandbox.load(on_load, target)
             if not ok then
-                return false, errors
+                break
             end
         end
     end
 
-    -- ok
-    return true
+    -- leave toolchains environment
+    environment.leave("toolchains")
+
+    -- ok?
+    return ok, errors
 end
 
 -- get the given target
