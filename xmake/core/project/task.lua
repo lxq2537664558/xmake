@@ -32,7 +32,7 @@ local utils         = require("base/utils")
 local string        = require("base/string")
 local interpreter   = require("base/interpreter")
 local sandbox       = require("sandbox/sandbox")
-local global        = require("project/global")
+local global        = require("base/global")
 local config        = require("project/config")
 local project       = require("project/project")
 local sandbox_os    = require("sandbox/modules/os")
@@ -187,7 +187,7 @@ function task._interpreter()
             ,   scriptdir   = function () return sandbox_os.scriptdir() end
             ,   globaldir   = global.directory()
             ,   configdir   = config.directory()
-            ,   projectdir  = xmake._PROJECT_DIR
+            ,   projectdir  = os.projectdir()
             ,   programdir  = os.programdir()
             }
 
