@@ -25,8 +25,8 @@
 -- imports
 import("core.base.semver")
 import("core.base.option")
+import("core.base.global")
 import("core.project.cache")
-import("core.project.global")
 import("core.project.project")
 import("core.package.package", {alias = "core_package"})
 import("devel.git")

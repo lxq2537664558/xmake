@@ -28,9 +28,9 @@ local repository = repository or {}
 -- load modules
 local utils     = require("base/utils")
 local string    = require("base/string")
+local global    = require("base/global")
 local cache     = require("project/cache")
 local config    = require("project/config")
-local global    = require("project/global")
 
 -- get cache
 function repository._cache(is_global)
