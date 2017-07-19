@@ -426,7 +426,7 @@ function project._load_targets()
     assert(interp) 
 
     -- enter the project directory
-    local ok, errors = os.cd(project.directory())
+    local ok, errors = os.cd(os.projectdir())
     if not ok then
         return nil, errors
     end
@@ -488,7 +488,7 @@ function project._load_options(disable_filter)
     assert(interp) 
 
     -- enter the project directory
-    local ok, errors = os.cd(project.directory())
+    local ok, errors = os.cd(os.projectdir())
     if not ok then
         return nil, errors
     end
