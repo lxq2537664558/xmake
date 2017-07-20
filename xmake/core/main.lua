@@ -33,9 +33,9 @@ local option        = require("base/option")
 local profiler      = require("base/profiler")
 local deprecated    = require("base/deprecated")
 local privilege     = require("base/privilege")
-local task          = require("project/task")
-local history       = require("project/history")
+local task          = require("base/task")
 local project       = require("project/project")
+local history       = require("project/history")
 local package       = require("package/package")
 
 -- init the option menu
