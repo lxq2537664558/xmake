@@ -78,7 +78,6 @@ function sandbox_utils.print(format, ...)
             catch 
             {
                 function (errors)
-                    print(errors)
                     -- print multi-variables with raw lua action
                     sandbox_utils._print(format, unpack(args))
                 end
