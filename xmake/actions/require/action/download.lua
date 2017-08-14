@@ -144,7 +144,8 @@ function main(package)
     local oldir = os.cd(workdir)
 
     -- download package from urls
-    for idx, url in ipairs(_urls(package)) do
+    local urls = _urls(package)
+    for idx, url in ipairs(urls) do
 
         -- filter url
         url = package:filter():handle(url)

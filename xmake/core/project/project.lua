@@ -639,26 +639,22 @@ end
 -- get packages
 function project.packages()
 
-    -- get interpreter
-    local interp = project._interpreter()
-    assert(interp) 
-
     -- get it from cache first
     if project._PACKAGES then
         return project._PACKAGES, interp
     end
 
     -- get interpreter
-    local interp = project._interpreter()
+    local interp = project.interpreter()
     assert(interp) 
 
     -- the project file is not found?
-    if not os.isfile(xmake._PROJECT_FILE) then
+    if not os.isfile(os.projectfile()) then
         return {}, nil
     end
 
     -- load the tasks from the the project file and disable filter, we will process filter after a while
-    local results, errors = interp:load(xmake._PROJECT_FILE, "package", true, false)
+    local results, errors = interp:load(os.projectfile(), "package", true, false)
     if not results then
         return nil, errors
     end
